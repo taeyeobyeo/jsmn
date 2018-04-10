@@ -28,6 +28,11 @@ int main() {
 
 	jsmn_init(&p);
 	r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
+	
+#ifdef DEBUG_MODE
+	printf("Token count: %d", r);
+#endif
+
 	if (r < 0) {
 		printf("Failed to parse JSON: %d\n", r);
 		return 1;
