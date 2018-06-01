@@ -7,7 +7,7 @@ libjsmn.a: jsmn.o
 	$(AR) rc $@ $^
 
 %.o: %.c jsmn.h
-	$(CC) $(DEBUG) -c $(CFLAGS) $< -o $@
+	$(CC) -DJSMN_PARENT_LINKS $(DEBUG) -c $(CFLAGS) $< -o $@
 
 test: test_default test_strict test_links test_strict_links
 test_default: test/tests.c
@@ -32,7 +32,7 @@ myexample: example/myjson.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 
 filesimple: example/filesimple.o libjsmn.a
-		$(CC) -DJSMN_PARENT_LINKS $(LDFLAGS) $^ -o $@
+		$(CC)  $(LDFLAGS) $^ -o $@
 
 jsondump: example/jsondump.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@

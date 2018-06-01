@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define JSMN_PARENT_LINKS
 #include "../jsmn.h"
 
 /*
@@ -24,12 +22,11 @@ char *readJSONfile() {
 		exit(1);
 	}
 	char oneline[255];
-	int len = 0;
 	char * JSON_STRING = (char*)malloc(sizeof(oneline));
-	while(1){
+	JSON_STRING[0] = '\0';
+	while (1) {
 		fgets(oneline, sizeof(oneline), file);
-		len+=strlen(oneline);
-		JSON_STRING = (char*)realloc(JSON_STRING, len + 1);
+		JSON_STRING = (char*)realloc(JSON_STRING, sizeof(char)*(strlen(JSON_STRING) + strlen(oneline) + 1));
 		strcat(JSON_STRING, oneline);
 		if (feof(file)) break;
 	}
@@ -39,22 +36,22 @@ char *readJSONfile() {
 
 /**/
 void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex) {
-	int i = 1; //
+	int i = 0;
 	int j = 0;
-	int depth = t[i].parent; // 0은 {여서 첫번째를 위해 1을 넣음
-	for(i = 1; i < tokcount; i++){
-		if(t[i].parent == depth){
-			nameTokIndex[j] = i;
-		}
-		j++;
+	int depth = t[1].parent; // 0은 {여서 첫번째를 위해 1을 넣음
+	//parent랑 똑같은걸 넣음
+	for (i = 0; i < tokcount; i++) {
+		if (t[i].parent == depth)
+			nameTokIndex[j++] = i;
 	}
 	nameTokIndex[0] = j;
 }
 
 void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
-	int j = 1;
+	int j = 0;
 	printf("***** Name List *****\n");
-	for (j = 1; j < nameTokIndex[0]; j++) {
+	for (j = 0; j < 100; j++) {
+		if (nameTokIndex[j] == -1) break;
 		printf("[Name %d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
 	}
 	printf("\n");
@@ -156,12 +153,15 @@ int main() {
 	int i;
 	int r;
 	jsmn_parser p;
-	int nameTokIndex[100] = {0};
+	int nameTokIndex[100] = { -1 };
+	for (i = 0; i < 100; i++) nameTokIndex[i] = -1;
 	int firstValue[30] = {0};
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 	char* JSON_STRING = readJSONfile();
 	//printf("%s\n", JSON_STRING);
-
+#ifdef JSMN_PARENT_LINKS
+	printf("Parent\n");
+#endif
 	
 
 	jsmn_init(&p);
