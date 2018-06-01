@@ -15,7 +15,7 @@
 	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
 */
 
-/*Reads .json file*/
+/*Reads Json File*/
 char *readJSONfile() {
 	FILE * file;
 	file = fopen("data.json", "r");
@@ -24,11 +24,12 @@ char *readJSONfile() {
 		exit(1);
 	}
 	char oneline[255];
+	int len = 0;
 	char * JSON_STRING = (char*)malloc(sizeof(oneline));
-	JSON_STRING[0] = '\0';
 	while(1){
-		fgets(oneline, 255, file);
-		(char*)realloc(JSON_STRING, sizeof(char)*(strlen(JSON_STRING)+strlen(oneline) + 1));
+		fgets(oneline, sizeof(oneline), file);
+		len+=strlen(oneline);
+		JSON_STRING = (char*)realloc(JSON_STRING, len + 1);
 		strcat(JSON_STRING, oneline);
 		if (feof(file)) break;
 	}
@@ -38,27 +39,22 @@ char *readJSONfile() {
 
 /**/
 void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex) {
-	int i, j = 0, depth = 0;
-	for (i = 0; i < tokcount; i++) {
-#ifdef JSMN_PARENT_LINKS
-		if (t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent == -1) {
+	int i = 1; //
+	int j = 0;
+	int depth = t[i].parent; // 0은 {여서 첫번째를 위해 1을 넣음
+	for(i = 1; i < tokcount; i++){
+		if(t[i].parent == depth){
 			nameTokIndex[j] = i;
-			j++;
 		}
-#else
-		if (t[i].type == JSMN_STRING && t[i].size == 1) {
-			nameTokIndex[j] = i;
-			j++;
-		}
-#endif
+		j++;
 	}
+	nameTokIndex[0] = j;
 }
 
 void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	int j = 1;
 	printf("***** Name List *****\n");
-	for (j = 0; j < 100; j++) {
-		if (nameTokIndex[j] == 0) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
+	for (j = 1; j < nameTokIndex[0]; j++) {
 		printf("[Name %d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
 	}
 	printf("\n");
