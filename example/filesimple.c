@@ -44,7 +44,6 @@ void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex)
 		if (t[i].parent == depth)
 			nameTokIndex[j++] = i;
 	}
-	nameTokIndex[0] = j;
 }
 
 void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
@@ -59,6 +58,7 @@ void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 
 void selectNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	int input;
+	printf("***** Object List *****\n");
 	while (1) {
 		printf("\nSelect Name's no (exit:0) >> ");
 		scanf("%d",&input);
@@ -159,9 +159,7 @@ int main() {
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 	char* JSON_STRING = readJSONfile();
 	//printf("%s\n", JSON_STRING);
-#ifdef JSMN_PARENT_LINKS
-	printf("Parent\n");
-#endif
+
 	
 
 	jsmn_init(&p);
@@ -176,7 +174,7 @@ int main() {
 	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
 	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
 	//printObjectList(JSON_STRING, t, nameTokIndex);
-	//selectNameList(JSON_STRING, t, nameTokIndex);
+	selectNameList(JSON_STRING, t, nameTokIndex);
 	/* Assume the top-level element is an object */
 	//printFirst(JSON_STRING,t,nameTokIndex);
 
