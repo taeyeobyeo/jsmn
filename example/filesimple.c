@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define JSMN_PARENT_LINKS
 #include "../jsmn.h"
 
 /*
@@ -12,7 +14,6 @@
 	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
 	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
 */
-
 
 /*Reads .json file*/
 char *readJSONfile() {
@@ -39,16 +40,17 @@ char *readJSONfile() {
 void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex) {
 	int i, j = 0, depth = 0;
 	for (i = 0; i < tokcount; i++) {
-		if(t[i].type == JSMN_OBJECT || t[i].type == JSMN_ARRAY){
-			depth++;
-		}
-		else if(t[i].type == JSMN_STRING && t[i].size != 1 && t[i + 1].type == JSMN_OBJECT){
-			depth--;
-		}
-		if (t[i].type == JSMN_STRING && t[i].size == 1 && depth == 1) {
+#ifdef JSMN_PARENT_LINKS
+		if (t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent == -1) {
 			nameTokIndex[j] = i;
 			j++;
 		}
+#else
+		if (t[i].type == JSMN_STRING && t[i].size == 1) {
+			nameTokIndex[j] = i;
+			j++;
+		}
+#endif
 	}
 }
 
@@ -136,6 +138,16 @@ void printSelectedObject(char* jsonstr, jsmntok_t *t, int* nameTokIndex, int *fi
 	free(str);
 }
 
+void printFirst(char* jsonstr, jsmntok_t *t, int* nameTokIndex){
+	int j = 1;
+	printf("***** Name List *****\n");
+	for (j = 0; j < 100; j++) {
+		if (nameTokIndex[j] == 0) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
+		printf("[Name %d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
+	}
+	printf("\n");
+}
+
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
 			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
@@ -152,7 +164,7 @@ int main() {
 	int firstValue[30] = {0};
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 	char* JSON_STRING = readJSONfile();
-	printf("%s\n", JSON_STRING);
+	//printf("%s\n", JSON_STRING);
 
 	
 
@@ -165,11 +177,12 @@ int main() {
 	
 	jsonNameList(JSON_STRING, t, r, nameTokIndex);
 	printNameList(JSON_STRING, t, nameTokIndex);
-	int c = printFirstValue(JSON_STRING, t, r, firstValue);
+	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
 	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
 	//printObjectList(JSON_STRING, t, nameTokIndex);
 	//selectNameList(JSON_STRING, t, nameTokIndex);
 	/* Assume the top-level element is an object */
+	//printFirst(JSON_STRING,t,nameTokIndex);
 
 	if (r < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Object expected\n");

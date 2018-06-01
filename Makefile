@@ -32,7 +32,7 @@ myexample: example/myjson.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 
 filesimple: example/filesimple.o libjsmn.a
-		$(CC) $(LDFLAGS) $^ -o $@
+		$(CC) -DJSMN_PARENT_LINKS $(LDFLAGS) $^ -o $@
 
 jsondump: example/jsondump.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@

@@ -42,6 +42,7 @@ typedef struct {
 	int start;
 	int end;
 	int size;
+	int depth;
 #ifdef JSMN_PARENT_LINKS
 	int parent;
 #endif
