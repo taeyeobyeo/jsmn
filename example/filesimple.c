@@ -16,7 +16,7 @@
 /*Reads Json File*/
 char *readJSONfile() {
 	FILE * file;
-	file = fopen("data.json", "r");
+	file = fopen("data3.json", "r");
 	if (file == NULL) {
 		printf("Can't open file\n");
 		exit(1);
@@ -173,10 +173,17 @@ int main() {
 	}
 	
 	jsonNameList(JSON_STRING, t, r, nameTokIndex);
+<<<<<<< HEAD
 	printNameList(JSON_STRING, t, nameTokIndex);
 	selectNameList(JSON_STRING, t, nameTokIndex);
 	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
 	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
+=======
+	//printNameList(JSON_STRING, t, nameTokIndex);
+	//selectNameList(JSON_STRING, t, nameTokIndex);
+	int c = printFirstValue(JSON_STRING, t, r, firstValue);
+	printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
+>>>>>>> bdc53dd821c2cf2eed06b9fe17eb2ebf717d8056
 	//printObjectList(JSON_STRING, t, nameTokIndex);
 	/* Assume the top-level element is an object */
 	//printFirst(JSON_STRING,t,nameTokIndex);
