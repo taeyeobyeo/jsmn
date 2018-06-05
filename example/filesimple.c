@@ -15,8 +15,13 @@
 
 /*Reads Json File*/
 char *readJSONfile() {
+	char filename[30] = "\0";
+	char name[40] = ".json";
+	printf("원하는 파일명 입력: ");
+	scanf("%s", &filename);
+	strcat(filename, name);
 	FILE * file;
-	file = fopen("data3.json", "r");
+	file = fopen(filename, "r");
 	if (file == NULL) {
 		printf("Can't open file\n");
 		exit(1);
