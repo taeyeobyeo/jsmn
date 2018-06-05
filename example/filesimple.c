@@ -16,7 +16,7 @@
 /*Reads Json File*/
 char *readJSONfile() {
 	FILE * file;
-	file = fopen("data.json", "r");
+	file = fopen("data3.json", "r");
 	if (file == NULL) {
 		printf("Can't open file\n");
 		exit(1);
@@ -72,7 +72,7 @@ void printObjectList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	int j = 1;
 	printf("***** Object List *****\n");
 	for (j = 0; j < 100; j++) {
-		if (nameTokIndex[j] == 0) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
+		if (nameTokIndex[j] == -1) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
 		printf("[%.*s] %.*s\n", t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start, t[nameTokIndex[j] + 1].end - t[nameTokIndex[j] + 1].start, jsonstr + t[nameTokIndex[j] + 1].start);
 	}
 	printf("\n");
@@ -170,19 +170,18 @@ int main() {
 	}
 	
 	jsonNameList(JSON_STRING, t, r, nameTokIndex);
-	printNameList(JSON_STRING, t, nameTokIndex);
-	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
-	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
+	//printNameList(JSON_STRING, t, nameTokIndex);
+	//selectNameList(JSON_STRING, t, nameTokIndex);
+	int c = printFirstValue(JSON_STRING, t, r, firstValue);
+	printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
 	//printObjectList(JSON_STRING, t, nameTokIndex);
-	selectNameList(JSON_STRING, t, nameTokIndex);
 	/* Assume the top-level element is an object */
 	//printFirst(JSON_STRING,t,nameTokIndex);
-
+#ifdef nothing
 	if (r < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Object expected\n");
 		return 1;
 	}
-#ifdef nothing
 	/* Loop over all keys of the root object */
 	for (i = 1; i < r; i++) {
 		if (jsoneq(JSON_STRING, &t[i], "name") == 0) {
