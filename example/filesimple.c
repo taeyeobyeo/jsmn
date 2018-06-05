@@ -16,7 +16,7 @@
 /*Reads Json File*/
 char *readJSONfile() {
 	FILE * file;
-	file = fopen("data.json", "r");
+	file = fopen("data3.json", "r");
 	if (file == NULL) {
 		printf("Can't open file\n");
 		exit(1);
@@ -35,20 +35,22 @@ char *readJSONfile() {
 }
 
 /**/
-void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex) {
-	int i = 0;
-	int j = 0;
+void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex, int* objectList) {
+	int i = 0, j = 0, k = 0;
 	int depth = t[1].parent; // 0은 {여서 첫번째를 위해 1을 넣음
-	for(i =0; i< tokcount; i++){
-		if(t[i].type == JSMN_STRING){
-			depth = t[i].parent;
-			break;
+	
+	for(k = 0; k < 30; k++){//k는 objectList의 크기
+		if(objectList[k] == -1) break;
+		for(i = objectList[k]; i< tokcount; i++){
+			if(t[i].type == JSMN_STRING){
+				depth = t[i].parent;
+				break;
+			}
 		}
-	}
-	//parent랑 똑같은걸 넣음
-	for (i = 0; i < tokcount; i++) {
-		if (t[i].parent == depth)
-			nameTokIndex[j++] = i;
+		for (i = 0; i < tokcount; i++) {
+			if (t[i].parent == depth)
+				nameTokIndex[j++] = i;
+		}
 	}
 }
 
@@ -57,7 +59,7 @@ void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	printf("***** Name List *****\n");
 	for (j = 0; j < 100; j++) {
 		if (nameTokIndex[j] == -1) break;
-		printf("[Name %d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
+		printf("[Name %2d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
 	}
 	printf("\n");
 }
@@ -77,8 +79,8 @@ void selectNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	}
 }
 
-void selectObjectList(char* jsonstr, jsmntok_t *t, int tokcount){
-	int send[30];
+int* selectObjectList(char* jsonstr, jsmntok_t *t, int tokcount){
+	int* send = (int*)malloc(sizeof(int)*30);
 	int depth;
 	int i = 0, j=0;
 
@@ -98,7 +100,8 @@ void selectObjectList(char* jsonstr, jsmntok_t *t, int tokcount){
 			j++;
 		}
 	}
-	printObjectList(jsonstr, t, send);
+	return send;
+	//printObjectList(jsonstr, t, send);
 }
 
 void printObjectList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
@@ -106,7 +109,7 @@ void printObjectList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
 	printf("***** Object List *****\n");
 	for (j = 0; j < 100; j++) {
 		if (nameTokIndex[j] == -1) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
-		printf("[%.*s] %.*s\n", t[nameTokIndex[j] + 1].end - t[nameTokIndex[j] + 1].start, jsonstr + t[nameTokIndex[j] + 1].start, t[nameTokIndex[j] + 2].end - t[nameTokIndex[j] + 2].start, jsonstr + t[nameTokIndex[j] + 2].start);
+		printf("[%.*s %2d] %.*s\n", t[nameTokIndex[j] + 1].end - t[nameTokIndex[j] + 1].start, jsonstr + t[nameTokIndex[j] + 1].start, j+1,t[nameTokIndex[j] + 2].end - t[nameTokIndex[j] + 2].start, jsonstr + t[nameTokIndex[j] + 2].start);
 	}
 	
 	while(1){
@@ -133,6 +136,7 @@ int main() {
 	int r;
 	jsmn_parser p;
 	int nameTokIndex[100] = { -1 };
+	int* objectList;
 	for (i = 0; i < 100; i++) nameTokIndex[i] = -1;
 	int firstValue[30] = {0};
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
@@ -147,14 +151,13 @@ int main() {
 		printf("Failed to parse JSON: %d\n", r);
 		return 1;
 	}
-	
-	jsonNameList(JSON_STRING, t, r, nameTokIndex);
+	objectList = selectObjectList(JSON_STRING, t, r);
+	jsonNameList(JSON_STRING, t, r, nameTokIndex, objectList);
 	printNameList(JSON_STRING, t, nameTokIndex);
 	//selectNameList(JSON_STRING, t, nameTokIndex);
 	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
 	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
-	selectObjectList(JSON_STRING, t, r);
-	//printObjectList(JSON_STRING, t, nameTokIndex);
+	printObjectList(JSON_STRING, t, objectList);
 	/* Assume the top-level element is an object */
 	//printFirst(JSON_STRING,t,nameTokIndex);
 #ifdef nothing
