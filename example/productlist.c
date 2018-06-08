@@ -2,30 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../jsmn.h"
-
-
-
-
-/*
- * A small example of jsmn parsing when JSON structure is known and number of
- * tokens is predictable.
- */
-
-/*static const char *JSON_STRING =
-	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
-	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
-*/
+#include "productlist.h"
 
 /*Reads Json File*/
 char *readJSONfile() {
-	char filename[30] = "\0";
-	char name[40] = ".json";
-	printf("원하는 파일명 입력: ");
-	scanf("%s", &filename);
-	strcat(filename, name);
-	printf("%s\n",filename);
 	FILE * file;
-	file = fopen(filename, "r");
+	file = fopen("data4.json", "r");
 	if (file == NULL) {
 		printf("Can't open file\n");
 		exit(1);
@@ -42,11 +24,12 @@ char *readJSONfile() {
 	fclose(file);
 	return JSON_STRING;
 }
-
 /**/
-void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex, int* objectList) {
+void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, NameTokenInfo *nameTokIndex) {
 	int i = 0, j = 0, k = 0;
-	int depth = t[1].parent; // 0은 {여서 첫번째를 위해 1을 넣음
+	
+	
+	/*int depth = t[1].parent; // 0은 {여서 첫번째를 위해 1을 넣음
 	
 	for(k = 0; k < 30; k++){//k는 objectList의 크기
 		if(objectList[k] == -1) break;
@@ -60,7 +43,7 @@ void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, int *nameTokIndex,
 			if (t[i].parent == depth)
 				nameTokIndex[j++] = i;
 		}
-	}
+	}*/
 }
 
 void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
