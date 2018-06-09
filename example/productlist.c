@@ -4,6 +4,16 @@
 #include "../jsmn.h"
 #include "productlist.h"
 
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+
 /*Reads Json File*/
 char *readJSONfile() {
 	FILE * file;
@@ -27,110 +37,76 @@ char *readJSONfile() {
 /**/
 void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, NameTokenInfo *nameTokIndex) {
 	int i = 0, j = 0, k = 0;
-	
-	
-	/*int depth = t[1].parent; // 0은 {여서 첫번째를 위해 1을 넣음
-	
-	for(k = 0; k < 30; k++){//k는 objectList의 크기
-		if(objectList[k] == -1) break;
-		for(i = objectList[k]; i< tokcount; i++){
-			if(t[i].type == JSMN_STRING){
-				depth = t[i].parent;
-				break;
-			}
-		}
-		for (i = 0; i < tokcount; i++) {
-			if (t[i].parent == depth)
-				nameTokIndex[j++] = i;
-		}
-	}*/
-}
-
-void printNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
-	int j = 0;
-	printf("***** Name List *****\n");
-	for (j = 0; j < 100; j++) {
-		if (nameTokIndex[j] == -1) break;
-		printf("[Name %2d] %.*s\n", j + 1, t[nameTokIndex[j]].end - t[nameTokIndex[j]].start, jsonstr + t[nameTokIndex[j]].start);
-	}
-	printf("\n");
-}
-
-void selectNameList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
-	int input;
-	printf("***** Object List *****\n");
-	while (1) {
-		printf("\nSelect Name's no (exit:0) >> ");
-		scanf("%d",&input);
-		if (input == 0) break;
-		if(nameTokIndex[input - 1]== -1) printf("Does not exist\n");
-		else{
-			printf("[Name %d] %.*s\n", input, t[nameTokIndex[input - 1]].end - t[nameTokIndex[input - 1]].start, jsonstr + t[nameTokIndex[input - 1]].start);
-			printf("%.*s\n\n", t[nameTokIndex[input - 1] + 1].end - t[nameTokIndex[input - 1] + 1].start, jsonstr + t[nameTokIndex[input - 1] + 1].start);
-		}
-	}
-}
-
-int* selectObjectList(char* jsonstr, jsmntok_t *t, int tokcount){
-	int* send = (int*)malloc(sizeof(int)*30);
-	int depth;
-	int i = 0, j=0;
-
-	//send[30]초기화 -로
-	for(i =0; i<30;i++) send[i] = -1;
-	//depth찾기
-	for(i =0; i < tokcount; i++){
-		if(t[i].type == JSMN_OBJECT){
-			depth = t[i].parent;
+	int depth1 = 0, depth2 = 0;
+	//Ramen항목 아래 array, object순으로 되어있다. 
+	//이 특성을 이용해 array와 object가 연달아 나왔을때 parent값을 저장
+	for (i = 0; i < tokcount; i++) {
+		if (i > 0 && t[i - 1].type == JSMN_ARRAY && t[i].type == JSMN_OBJECT) {
+			depth1 = t[i].parent; //array를 가르킴
+			//printf("%d\n", depth1);
+			depth2 = t[i + 1].parent; //object를 가르킴
+			//printf("%d\n", depth2);
 			break;
 		}
 	}
-	//object이면 send에 저장
-	for(i = 0, j =0; i < tokcount; i++){
-		if(t[i].parent == depth){
-			send[j] = i;
-			j++;
+	for (i = 0; i< tokcount; i++) {
+		if (t[i].parent == depth1) { //parent가 array이면 depth2값을 조정
+			depth2 = i;
+		}
+		if (t[i].parent == depth2) { //parent가 object일때
+			nameTokIndex[j].objectList = depth2;
+			nameTokIndex[j++].tokindex = i;
+			//printf("%d %.*s\n", j,t[i].end - t[i].start, jsonstr + t[i].start);
 		}
 	}
-	return send;
-	//printObjectList(jsonstr, t, send);
 }
 
-void printObjectList(char* jsonstr, jsmntok_t *t, int *nameTokIndex) {
-	int j = 1, input;
-	printf("***** Object List *****\n");
-	for (j = 0; j < 100; j++) {
-		if (nameTokIndex[j] == -1) break; //0으로 초기화 되어있고 0은 토큰의 특성상 0을가진 토큰은 없어야됨
-		printf("[%.*s %2d] %.*s\n", t[nameTokIndex[j] + 1].end - t[nameTokIndex[j] + 1].start, jsonstr + t[nameTokIndex[j] + 1].start, j+1,t[nameTokIndex[j] + 2].end - t[nameTokIndex[j] + 2].start, jsonstr + t[nameTokIndex[j] + 2].start);
+void printToken(char * jsonstr, jsmntok_t *t, NameTokenInfo *nameTokIndex) {
+	int index = -1, savePreviousObject = -1;//index: +1을 더했을때 초기화 되도록 sPO는 바로 바뀌도록
+	int i = 0;
+	//다 따로따로하면 너무 지저분해서 하나로 합침
+	Ramen ramen[25]; //25인 이유는 nameTokIndex를 100으로 지정했는데 라면객체는 4개씩 담당하고 있어서
+	for (i = 0; i < 25; i++) {
+		ramen[i].company[0] = '\0';
+		ramen[i].name[0] = '\0';
+		ramen[i].count[0] = '\0';
+		ramen[i].price[0] = '\0';
 	}
-	
-	while(1){
-		printf("원하는 번호 입력 (exit: 0): "); scanf("%d", &input);
-		if(input == 0) break;
-		if(nameTokIndex[input - 1] == -1){
-			printf("no value\n");
-			continue;
+	i = 0;
+	printf("**************************************\n");
+	printf("번호	제품명	제조사	가격	개수\n");
+	printf("**************************************\n");
+	while (nameTokIndex[i].objectList != -1) {
+		if (nameTokIndex[i].objectList != savePreviousObject) {
+			savePreviousObject = nameTokIndex[i].objectList;
+			index++;
 		}
-		printf("%.*s\n", t[nameTokIndex[input - 1]].end - t[nameTokIndex[input - 1]].start, jsonstr + t[nameTokIndex[input - 1]].start);
-	}	
-}
-
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
-			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-		return 0;
+		//t[nameTokIndex[i].tokindex].end - t[nameTokIndex[i].tokindex].start, jsonstr + t[nameTokIndex[i].tokindex].start string 프린트하는 양식
+		if (jsoneq(jsonstr, &t[nameTokIndex[i].tokindex], "name") == 0) {
+			sprintf(ramen[index].name, "%.*s", t[nameTokIndex[i].tokindex + 1].end - t[nameTokIndex[i].tokindex + 1].start, jsonstr + t[nameTokIndex[i].tokindex + 1].start);
+		}
+		else if (jsoneq(jsonstr, &t[nameTokIndex[i].tokindex], "company") == 0) {
+			sprintf(ramen[index].company, "%.*s", t[nameTokIndex[i].tokindex + 1].end - t[nameTokIndex[i].tokindex + 1].start, jsonstr + t[nameTokIndex[i].tokindex + 1].start);
+		}
+		else if (jsoneq(jsonstr, &t[nameTokIndex[i].tokindex], "price") == 0) {
+			sprintf(ramen[index].price, "%.*s", t[nameTokIndex[i].tokindex + 1].end - t[nameTokIndex[i].tokindex + 1].start, jsonstr + t[nameTokIndex[i].tokindex + 1].start);
+		}
+		else if (jsoneq(jsonstr, &t[nameTokIndex[i].tokindex], "count") == 0) {
+			sprintf(ramen[index].count, "%.*s", t[nameTokIndex[i].tokindex + 1].end - t[nameTokIndex[i].tokindex + 1].start, jsonstr + t[nameTokIndex[i].tokindex + 1].start);
+		}
+		i++;
 	}
-	return -1;
+	for (i = 0; i < index + 1; i++) {
+		printf("%d	%s	%s	%s	%s\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
+		//printf("%d	%s	%s	%d	%d\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
+	}
 }
 
 int main() {
 	int i;
 	int r;
 	jsmn_parser p;
-	int nameTokIndex[100] = { -1 };
-	int* objectList;
-	for (i = 0; i < 100; i++) nameTokIndex[i] = -1;
-	int firstValue[30] = {0};
+	NameTokenInfo nameTokIndex[100];
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 	char* JSON_STRING = readJSONfile();
 	//printf("%s\n", JSON_STRING);
@@ -143,15 +119,8 @@ int main() {
 		printf("Failed to parse JSON: %d\n", r);
 		return 1;
 	}
-	objectList = selectObjectList(JSON_STRING, t, r);
-	jsonNameList(JSON_STRING, t, r, nameTokIndex, objectList);
-	printNameList(JSON_STRING, t, nameTokIndex);
-	//selectNameList(JSON_STRING, t, nameTokIndex);
-	//int c = printFirstValue(JSON_STRING, t, r, firstValue);
-	//printSelectedObject(JSON_STRING, t, nameTokIndex, firstValue, c);
-	printObjectList(JSON_STRING, t, objectList);
-	/* Assume the top-level element is an object */
-	//printFirst(JSON_STRING,t,nameTokIndex);
+	jsonNameList(JSON_STRING, t, r, nameTokIndex);
+	printToken(JSON_STRING,t,nameTokIndex);
 #ifdef nothing
 	if (r < 1 || t[0].type != JSMN_OBJECT) {
 		printf("Object expected\n");

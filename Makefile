@@ -34,6 +34,9 @@ myexample: example/myjson.o libjsmn.a
 filesimple: example/filesimple.o libjsmn.a
 		$(CC)  $(LDFLAGS) $^ -o $@
 
+productlist: example/productlist.o libjsmn.a
+		$(CC)  $(LDFLAGS) $^ -o $@
+
 jsondump: example/jsondump.o libjsmn.a
 	$(CC) $(LDFLAGS) $^ -o $@
 
@@ -42,6 +45,7 @@ clean:
 	rm -f *.a *.so
 	rm -f myexample
 	rm -f simple_example
+	rm -f productlist
 	rm -f filesimple
 	rm -f jsondump
 
