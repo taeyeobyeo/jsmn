@@ -1,0 +1,29 @@
+{
+  "Drinks":
+  [
+    {
+      "company": "탐사",
+      "name": "스파클링",
+      "price": 412,
+      "count": 24
+    },
+    {
+      "company": "동아오츠카",
+      "name": "포카리스웨트",
+      "price": 943,
+      "count": 20
+    },
+    {
+      "company": "코카콜라",
+      "name": "코카콜라",
+      "price": 705,
+      "count": 24
+    },
+    {
+      "company": "롳데칠성음료",
+      "name": "트레비",
+      "price": 720,
+      "count": 20
+    }
+  ]
+}

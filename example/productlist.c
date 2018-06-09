@@ -74,9 +74,9 @@ void printToken(char * jsonstr, jsmntok_t *t, NameTokenInfo *nameTokIndex) {
 		ramen[i].price[0] = '\0';
 	}
 	i = 0;
-	printf("**************************************\n");
-	printf("번호	제품명	제조사	가격	개수\n");
-	printf("**************************************\n");
+	printf("**********************************************\n");
+	printf("번호	제품명	제조사	가격	개수	총가격\n");
+	printf("**********************************************\n");
 	while (nameTokIndex[i].objectList != -1) {
 		if (nameTokIndex[i].objectList != savePreviousObject) {
 			savePreviousObject = nameTokIndex[i].objectList;
