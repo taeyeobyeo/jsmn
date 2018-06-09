@@ -4,9 +4,6 @@
 #include "../jsmn.h"
 #include "productlist.h"
 
-typedef struct {
-	char company[20], name[20], price[20], count[20];
-}Ramen;
 
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
@@ -106,7 +103,8 @@ void printToken(char * jsonstr, jsmntok_t *t, NameTokenInfo *nameTokIndex) {
 	}*/
 	i = 0;
 	while(ramen[i].name[0] != '\0'){
-		printf("%d	%s	%s	%s	%s\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
+		ramen[i].total = atoi(ramen[i].price) * atoi(ramen[i].count);
+		printf("%d	%s	%s	%s	%s	%d\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count, ramen[i].total);
 		i++;
 	}
 }
