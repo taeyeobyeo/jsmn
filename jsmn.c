@@ -316,15 +316,3 @@ void jsmn_init(jsmn_parser *parser) {
 	parser->toknext = 0;
 	parser->toksuper = -1;
 }
-
-static void printTokens(jsmntok_t *t, int count){
-	int i;
-	for(i =0;i<count;i++){
-#ifdef JSMN_PARENT_LINKS
-		printf("%d: start:%d, end:%d, size:%d, type:%d, parent:%d\n",i,t->start,t->end,t->size,t->type, t->parent);
-#else
-		printf("%d: start:%d, end:%d, size:%d, type:%d\n",i,t->start,t->end,t->size,t->type);
-#endif
-
-	}
-}

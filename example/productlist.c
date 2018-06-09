@@ -4,6 +4,9 @@
 #include "../jsmn.h"
 #include "productlist.h"
 
+typedef struct {
+	char company[20], name[20], price[20], count[20];
+}Ramen;
 
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
@@ -12,7 +15,6 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 	}
 	return -1;
 }
-
 
 /*Reads Json File*/
 char *readJSONfile() {
@@ -34,6 +36,7 @@ char *readJSONfile() {
 	fclose(file);
 	return JSON_STRING;
 }
+
 /**/
 void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, NameTokenInfo *nameTokIndex) {
 	int i = 0, j = 0, k = 0;
@@ -57,10 +60,11 @@ void jsonNameList(char * jsonstr, jsmntok_t *t, int tokcount, NameTokenInfo *nam
 			nameTokIndex[j].objectList = depth2;
 			nameTokIndex[j++].tokindex = i;
 			//printf("%d %.*s\n", j,t[i].end - t[i].start, jsonstr + t[i].start);
+			//printf("%d, ", nameTokIndex[j - 1].objectList);
+			//printf("%d\n", nameTokIndex[j - 1].tokindex);
 		}
 	}
 }
-
 void printToken(char * jsonstr, jsmntok_t *t, NameTokenInfo *nameTokIndex) {
 	int index = -1, savePreviousObject = -1;//index: +1을 더했을때 초기화 되도록 sPO는 바로 바뀌도록
 	int i = 0;
@@ -96,9 +100,14 @@ void printToken(char * jsonstr, jsmntok_t *t, NameTokenInfo *nameTokIndex) {
 		}
 		i++;
 	}
+	/*
 	for (i = 0; i < index + 1; i++) {
 		printf("%d	%s	%s	%s	%s\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
-		//printf("%d	%s	%s	%d	%d\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
+	}*/
+	i = 0;
+	while(ramen[i].name[0] != '\0'){
+		printf("%d	%s	%s	%s	%s\n", i + 1, ramen[i].name, ramen[i].company, ramen[i].price, ramen[i].count);
+		i++;
 	}
 }
 
